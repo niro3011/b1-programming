@@ -1,7 +1,7 @@
 import random
 import string
-
-password = input("Hier bitte Passwort Danke:")
+print("Please make sure your password meets the requirements.")
+password = input("Please insert your password:")
 
 def check_min_length(password,min_len=8):
     if len(password) >= min_len:
@@ -30,6 +30,10 @@ def validation(password):
         "has special char": (has_special_char, "No special characters"),
         "has minumum length": (check_min_length, "Not minimum length")        
     }
+    affirmation = ["i know you are able to choose a strong password :-)", "you will be able to secure youre account at some point. ;-)","choose something far better please :-("]
+    aff = random.choice(affirmation)
+    succtest = ["Great Job, you can follow instructions", "Great success", "you are the best at choosing a password based on specific requirements"]
+    successtext = random.choice(succtest)
 
     results = {}
     issues = []
@@ -42,33 +46,13 @@ def validation(password):
             
     if all(results.values()):
         print(f"{password} is fine - no errors found")
+        print(successtext)
     else:
         print(f"FAIL: {password} please fix the following issues: {', '.join(issues)}")
+        print(aff)
     
-    print("Detailierte Prüfung:")
+    print("Details:")
     for key, value in results.items():
-        print(f"{key}: {'Y' if value else 'X'}")     
- 
+        print(f"{key}: {'Y' if value else 'X'}")
+
 validation(password)
-
-
-
-
-    #if (has_special_char(password) and has_digit(password) and has_lowercase(password) and has_uppercase(password) and check_min_length(password)):
-    #   print(f"{password} is good no complaints")
-    #else:
-    #    issues = []
-    #    if not has_digit(password):
-    #        issues.append("No digits")
-    #    if not has_lowercase(password):
-    #        issues.append("No lowercase letters")
-    #    if not has_uppercase(password):
-    #        issues.append("No uppercase letters")
-    #    if not has_special_char(password):
-    #        issues.append("No special characters")
-    #    if not check_min_length(password):
-    #        issues.append("Not minimum length")
-    #    
-    #    errormessage = ",".join(issues)
-    #    
-    #    print(f"FAIL: {password} - {errormessage}")
