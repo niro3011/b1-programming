@@ -44,21 +44,12 @@ def display_library(music_library):
 def filterby_artist(music_library):
     selected_artist = input("Select the Artist you want to filter: ")
     filter_artist = [song for song in music_library if song["artist"] == selected_artist]
-    display_library(music_library, filter_artist)
+    print(filter_artist)
 
 def filterby_genre(music_library):
     selected_genre = input("Select the Genre you want to filter: ")
     filter_genre = [song for song in music_library if song["genre"] == selected_genre]
-    display_library(music_library, filter_genre)
-
-
-
-#while True:
-#    add_song(music_library)    
-#    display_library(music_library)
-#    anothersong = input("Do you want to add another Song? (Y/N):")
-#    if anothersong != "Y" and anothersong != "y":
-#        break
+    print(filter_genre)
 
 # 4. Main Program Loop
 # TODO: Implement a loop that allows the user to:
