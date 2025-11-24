@@ -14,26 +14,50 @@ def add_student_grades(grades_db):
     while len(grades_db) <= 6:
         student_name = input("Please put in your Name:")
         student_score = input("Please put in your Score:")
-
+        math_score = input("Please put in your Math-Score")
+        history_score = input("Please put in your History-Score")
+        programming_score = input ("Please put in your Programming-Score")
+        
         student_data = {
             "Name" : (student_name),
-            "Score" : (student_score)
+            "Score" : (student_score),
+            "Math-Score" : (math_score),
+            "History-Score" : (history_score),
+            "Programming-Score" : (programming_score)
         }
-        grades_db.append(student_data)
-        print("Student added")
+
+        if student_data in grades_db:
+            print("Duplicate detected! Data NOT added.")
+            continue
+        else:
+            grades_db.append(student_data)
+            print("Student added")
+
+
+
     print(grades_db)
     return student_data, student_name,student_score
 add_student_grades(grades_db)
 
 # 3. Function to Calculate Statistics
 # TODO: Define a function that takes a student's name and calculates their:
-# - Average grade
-# - Highest grade
-# - Lowest grade
-# Handle cases where the student is not found or has no grades.
-# def get_student_stats(grades_db, student_name):
-# # ... implementation ...
-# pass
+def calculation(grades_db):
+    for student_data in grades_db:
+        student_name = student_data["Name"]
+        math_score = int(student_data["Math-Score"])
+        history_score = int(student_data["History-Score"])
+        programming_score = int(student_data["Programming-Score"])
+
+        avg_grade = (math_score + history_score + programming_score) / 3
+
+        # highest grade
+        high_grade = max([math_score, history_score, programming_score])
+
+        # lowest grade
+        low_grade = min([math_score, history_score, programming_score])
+
+        print(student_name, avg_grade, high_grade, low_grade)
+
 # 4. Function to Generate Full Report
 # TODO: Define a function that prints a report for all students, including their:
 # - Name
