@@ -47,7 +47,7 @@ def calculation(grades_db):
         math_score = int(student_data["Math-Score"])
         history_score = int(student_data["History-Score"])
         programming_score = int(student_data["Programming-Score"])
-
+asd
         avg_grade = (math_score + history_score + programming_score) / 3
 
         # highest grade
