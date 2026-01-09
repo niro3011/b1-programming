@@ -15,7 +15,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Regex pattern for log parsing
 LOG_PATTERN = re.compile(
     r'(?P<ip>[\d\.]+) - - \[(?P<timestamp>[^\]]+)\] '
     r'"(?P<method>\w+) (?P<url>[^\s]+) HTTP/[\d\.]+" '
@@ -35,15 +34,13 @@ security_incidents = []
 
 
 def parse_log_line(line):
-    """Parse a single log line."""
     match = LOG_PATTERN.match(line.strip())
     if not match:
         return None
     
     data = match.groupdict()
     data['status'] = int(data['status'])
-    
-    # Extract hour from timestamp
+
     try:
         dt = datetime.strptime(data['timestamp'], '%d/%b/%Y:%H:%M:%S %z')
         data['hour'] = dt.strftime('%Y-%m-%d %H:00')
@@ -54,7 +51,6 @@ def parse_log_line(line):
 
 
 def analyze_log_entry(entry):
-    """Analyze a parsed log entry."""
     global total_requests
     
     total_requests += 1
@@ -64,34 +60,28 @@ def analyze_log_entry(entry):
     
     if entry['hour']:
         hourly_traffic[entry['hour']] += 1
-    
-    # Check for errors
+
     if entry['status'] >= 400:
         errors.append(entry)
-    
-    # Check for security issues
+
     check_security(entry)
 
 
 def check_security(entry):
-    """Check for security issues."""
     ip = entry['ip']
     status = entry['status']
     url = entry['url']
-    
-    # Failed login (401)
+
     if status == 401:
         if ip not in failed_logins:
             failed_logins[ip] = []
         failed_logins[ip].append(entry)
         logger.warning(f"Failed login from {ip}")
-    
-    # Forbidden access (403)
+
     if status == 403:
         forbidden_access.append(entry)
         logger.warning(f"Forbidden access from {ip} to {url}")
-    
-    # Check for SQL injection patterns
+
     sql_patterns = ['union', 'select', 'insert', 'delete', 'drop', "' or '", '" or "']
     if any(pattern in url.lower() for pattern in sql_patterns):
         security_incidents.append({
@@ -104,7 +94,6 @@ def check_security(entry):
 
 
 def detect_brute_force():
-    """Detect brute force attacks (5+ failed logins)."""
     for ip, attempts in failed_logins.items():
         if len(attempts) >= 5:
             security_incidents.append({
@@ -116,7 +105,6 @@ def detect_brute_force():
 
 
 def process_log_file(filename):
-    """Process a log file line by line."""
     logger.info(f"Processing file: {filename}")
     
     try:
@@ -182,16 +170,14 @@ def generate_security_report():
     with open('security_incidents.txt', 'w') as f:
         f.write("SECURITY INCIDENTS REPORT\n")
         f.write("=" * 60 + "\n\n")
-        
-        # Brute force attacks
+
         brute_force = [i for i in security_incidents if i['type'] == 'Brute Force']
         if brute_force:
             f.write("Brute Force Attacks:\n")
             for incident in brute_force:
                 f.write(f"  IP: {incident['ip']} - {incident['attempts']} attempts\n")
             f.write("\n")
-        
-        # SQL injection attempts
+
         sql_attacks = [i for i in security_incidents if i['type'] == 'SQL Injection']
         if sql_attacks:
             f.write("SQL Injection Attempts:\n")
@@ -200,7 +186,6 @@ def generate_security_report():
                 f.write(f"    URL: {incident['url']}\n")
             f.write("\n")
         
-        # Failed logins by IP
         f.write("Failed Login Attempts by IP:\n")
         for ip, attempts in sorted(failed_logins.items(), key=lambda x: len(x[1]), reverse=True):
             f.write(f"  {ip}: {len(attempts)} attempts\n")
@@ -214,8 +199,7 @@ def generate_error_report():
         f.write("HTTP ERRORS (4xx and 5xx)\n")
         f.write("=" * 60 + "\n\n")
         f.write(f"Total Errors: {len(errors)}\n\n")
-        
-        # Group by status code
+
         by_status = {}
         for error in errors:
             status = error['status']
@@ -238,19 +222,16 @@ def main():
     """Main function."""
     print("Web Server Log Analyzer")
     print("=" * 60)
-    
-    # Process log file
+
     log_file = "logfile.txt"
     
     process_log_file(log_file)
     
     if total_requests > 0:
         print(f"\nAnalyzed {total_requests:,} requests")
-        
-        # Detect brute force before generating reports
+
         detect_brute_force()
-        
-        # Generate all reports
+
         print("Generating reports...")
         generate_summary_report()
         generate_security_report()

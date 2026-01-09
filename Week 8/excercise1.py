@@ -81,29 +81,23 @@ class User:
         for entry in self.activity_log:
             print(entry)
 
-
-# Beispiel-Nutzung:
 if __name__ == "__main__":
-    # User erstellen
+
     user1 = User("max_mueller", "sicheres_passwort123", "admin")
-    
-    # Info anzeigen
+
     user1.display_info()
-    
-    # Berechtigungen prüfen
+
     print(f"\nBerechtigungen: {user1.check_privileges()}")
-    
-    # Login-Versuche
+
     print("\n--- Login-Versuche ---")
-    user1.authenticate("falsches_passwort")  # Fehlschlag 1
-    user1.authenticate("falsches_passwort")  # Fehlschlag 2
-    user1.authenticate("falsches_passwort")  # Fehlschlag 3 -> Account gesperrt
-    user1.authenticate("sicheres_passwort123")  # Gesperrter Account
-    
-    # Activity Log anzeigen
+    user1.authenticate("falsches_passwort")
+    user1.authenticate("falsches_passwort")
+    user1.authenticate("falsches_passwort")  
+    user1.authenticate("sicheres_passwort123") 
+
     user1.show_activity_log()
     
-    # Neuer User mit erfolgreichem Login
+
     print("\n\n=== Neuer User ===")
     user2 = User("anna_schmidt", "geheim456", "standard")
     user2.authenticate("geheim456")  # Erfolg

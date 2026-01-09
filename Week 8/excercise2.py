@@ -29,8 +29,7 @@ class DeviceType(Enum):
 
 
 class Device:
-    """Device class representing a managed device in the system"""
-    
+
     def __init__(self, device_id: str, device_type: DeviceType, 
                  firmware_version: str, owner: str):
         self.device_id = device_id
@@ -47,16 +46,7 @@ class Device:
         logger.info(f"Device {device_id} created - Type: {device_type.value}, Owner: {owner}")
     
     def authorize_access(self, user: str, role: UserRole = UserRole.USER) -> bool:
-        """
-        Check if user has permission to control the device
-        
-        Args:
-            user: Username requesting access
-            role: User's role in the system
-            
-        Returns:
-            bool: True if access is authorized, False otherwise
-        """
+
         if self.is_quarantined:
             logger.warning(f"Access denied to {user} - Device {self.device_id} is quarantined")
             return False
@@ -64,13 +54,11 @@ class Device:
         if not self.is_active:
             logger.warning(f"Access denied to {user} - Device {self.device_id} is inactive")
             return False
-        
-        # Admins always have access
+
         if role == UserRole.ADMIN or user in self.admin_users:
             logger.info(f"Admin access granted to {user} for device {self.device_id}")
             return True
-        
-        # Check if user is in authorized list
+
         if user in self.authorized_users:
             logger.info(f"Access granted to {user} for device {self.device_id}")
             return True
@@ -79,17 +67,7 @@ class Device:
         return False
     
     def update_firmware(self, new_version: str, user: str, role: UserRole = UserRole.USER) -> bool:
-        """
-        Update device firmware version
-        
-        Args:
-            new_version: New firmware version string
-            user: User performing the update
-            role: User's role
-            
-        Returns:
-            bool: True if update successful, False otherwise
-        """
+
         if not self.authorize_access(user, role):
             logger.error(f"Firmware update failed - User {user} not authorized for device {self.device_id}")
             return False
@@ -103,16 +81,7 @@ class Device:
         return True
     
     def run_security_scan(self, user: str, role: UserRole = UserRole.USER) -> Dict[str, any]:
-        """
-        Run security scan on the device
-        
-        Args:
-            user: User initiating the scan
-            role: User's role
-            
-        Returns:
-            dict: Scan results including status and timestamp
-        """
+
         if not self.authorize_access(user, role):
             logger.error(f"Security scan failed - User {user} not authorized for device {self.device_id}")
             return {"success": False, "message": "Access denied"}
@@ -136,30 +105,17 @@ class Device:
     
     def check_compliance(self, override_user: Optional[str] = None, 
                         override_role: UserRole = UserRole.USER) -> bool:
-        """
-        Check device compliance status
-        Devices are non-compliant if not scanned within 30 days
-        
-        Args:
-            override_user: User requesting compliance override
-            override_role: Role of override user (must be ADMIN)
-            
-        Returns:
-            bool: True if compliant, False otherwise
-        """
-        # Admin override
+
         if override_user and override_role == UserRole.ADMIN:
             self.compliance_status = True
             logger.warning(f"Compliance override applied by admin {override_user} for device {self.device_id}")
             return True
         
-        # Check if device has been scanned
         if self.last_security_scan is None:
             self.compliance_status = False
             logger.info(f"Device {self.device_id} non-compliant - No security scan performed")
             return False
         
-        # Check if scan is within 30 days
         days_since_scan = (datetime.now() - self.last_security_scan).days
         
         if days_since_scan > 30:
@@ -172,17 +128,7 @@ class Device:
         return True
     
     def quarantine(self, user: str, role: UserRole, reason: str = "Security concern") -> bool:
-        """
-        Quarantine a compromised device
-        
-        Args:
-            user: User initiating quarantine
-            role: User's role (must be ADMIN)
-            reason: Reason for quarantine
-            
-        Returns:
-            bool: True if quarantine successful, False otherwise
-        """
+
         if role != UserRole.ADMIN:
             logger.error(f"Quarantine failed - User {user} does not have admin privileges")
             return False
@@ -193,16 +139,7 @@ class Device:
         return True
     
     def release_quarantine(self, user: str, role: UserRole) -> bool:
-        """
-        Release device from quarantine
-        
-        Args:
-            user: User releasing quarantine
-            role: User's role (must be ADMIN)
-            
-        Returns:
-            bool: True if release successful, False otherwise
-        """
+
         if role != UserRole.ADMIN:
             logger.error(f"Quarantine release failed - User {user} does not have admin privileges")
             return False
@@ -213,7 +150,6 @@ class Device:
         return True
     
     def add_authorized_user(self, user: str, admin: str, admin_role: UserRole) -> bool:
-        """Add user to authorized users list"""
         if admin_role != UserRole.ADMIN and admin not in self.admin_users:
             logger.error(f"Failed to add user - {admin} does not have admin privileges")
             return False
@@ -231,22 +167,13 @@ class Device:
 
 
 class DeviceManager:
-    """Manages a collection of devices and provides security reporting"""
-    
+
     def __init__(self):
         self.devices: Dict[str, Device] = {}
         logger.info("DeviceManager initialized")
     
     def add_device(self, device: Device) -> bool:
-        """
-        Add a device to the manager
-        
-        Args:
-            device: Device object to add
-            
-        Returns:
-            bool: True if added successfully, False if device already exists
-        """
+
         if device.device_id in self.devices:
             logger.warning(f"Device {device.device_id} already exists in manager")
             return False
@@ -256,17 +183,7 @@ class DeviceManager:
         return True
     
     def remove_device(self, device_id: str, user: str, role: UserRole) -> bool:
-        """
-        Remove a device from the manager
-        
-        Args:
-            device_id: ID of device to remove
-            user: User performing removal
-            role: User's role (must be ADMIN)
-            
-        Returns:
-            bool: True if removed successfully, False otherwise
-        """
+
         if role != UserRole.ADMIN:
             logger.error(f"Device removal failed - User {user} does not have admin privileges")
             return False
@@ -296,7 +213,6 @@ class DeviceManager:
         quarantined_devices = sum(1 for d in self.devices.values() if d.is_quarantined)
         never_scanned = sum(1 for d in self.devices.values() if d.last_security_scan is None)
         
-        # Find devices needing attention
         needs_scan = []
         for device in self.devices.values():
             if device.last_security_scan is None:
@@ -351,37 +267,28 @@ class DeviceManager:
         return non_compliant_count
 
 
-# Example usage
 if __name__ == "__main__":
-    # Create device manager
     manager = DeviceManager()
     
-    # Create some devices
     device1 = Device("DEV001", DeviceType.LAPTOP, "v2.1.0", "john_doe")
     device2 = Device("DEV002", DeviceType.MOBILE, "v1.5.3", "jane_smith")
     device3 = Device("DEV003", DeviceType.SERVER, "v3.0.1", "admin_user")
     
-    # Add devices to manager
     manager.add_device(device1)
     manager.add_device(device2)
     manager.add_device(device3)
     
-    # Run security scans
     device1.run_security_scan("john_doe", UserRole.USER)
     device2.run_security_scan("jane_smith", UserRole.USER)
     
-    # Update firmware
     device1.update_firmware("v2.2.0", "john_doe", UserRole.USER)
     
-    # Check compliance
     device1.check_compliance()
     device2.check_compliance()
     device3.check_compliance()
     
-    # Quarantine a compromised device
     device3.quarantine("admin_user", UserRole.ADMIN, "Malware detected")
     
-    # Generate security report
     report = manager.generate_security_report()
     print("\n=== SECURITY REPORT ===")
     print(f"Total Devices: {report['summary']['total_devices']}")

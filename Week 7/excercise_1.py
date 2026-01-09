@@ -1,20 +1,18 @@
-# Konstanten außerhalb der Funktionen definieren
 CATEGORY_DISCOUNTS = {
-    "Electronics": 0.90,  # 10% Rabatt
-    "Clothing": 0.85,     # 15% Rabatt
-    "Books": 0.95,        # 5% Rabatt
-    "Home": 0.88          # 12% Rabatt
+    "Electronics": 0.90,  
+    "Clothing": 0.85,     
+    "Books": 0.95,        
+    "Home": 0.88          
 }
 
 TIER_DISCOUNTS = {
-    "Premium": 0.95,      # zusätzlich 5% Rabatt
-    "Standard": 1.00,     # kein zusätzlicher Rabatt
-    "Budget": 0.98        # zusätzlich 2% Rabatt
+    "Premium": 0.95,     
+    "Standard": 1.00,    
+    "Budget": 0.98       
 }
 
 def readdata():
-    """Liest Produktdaten aus der Datei und gibt eine Liste von Dictionaries zurück."""
-    products = []
+   products = []
     try:
         with open(r"Week 7\products.txt", "r", encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
@@ -36,16 +34,13 @@ def readdata():
     return products
 
 def calculation(products):
-    """Berechnet die finalen Preise mit Kategorie- und Tier-Rabatten."""
     for product in products:
         original_price = product["price"]
         price = original_price
         
-        # Kategorie-Rabatt
         if product["category"] in CATEGORY_DISCOUNTS:
             price *= CATEGORY_DISCOUNTS[product["category"]]
         
-        # Tier-Rabatt
         if product["tier"] in TIER_DISCOUNTS:
             price *= TIER_DISCOUNTS[product["tier"]]
         
@@ -55,20 +50,16 @@ def calculation(products):
     return products
 
 def write_report(products):
-    """Schreibt einen formatierten Bericht in eine Datei."""
     try:
         with open(r"Week 7\discount_report.txt", "w", encoding="utf-8") as f:
-            # Header
             f.write("=" * 80 + "\n")
             f.write("PRODUCT DISCOUNT REPORT\n")
             f.write("=" * 80 + "\n\n")
             
-            # Spaltenüberschriften
             header = f"{'Product':<20} {'Category':<15} {'Tier':<10} {'Original':>10} {'Final':>10} {'Discount':>10}\n"
             f.write(header)
             f.write("-" * 80 + "\n")
             
-            # Produktdaten
             for p in products:
                 line = (
                     f"{p['name']:<20} "
@@ -107,21 +98,17 @@ def print_summary(products):
     print(f"Durchschnittlicher Rabatt:     {average_discount:.2f} %")
     print("=" * 80 + "\n")
 
-# Hauptprogramm
 def main():
     print("Starte Produktverarbeitung...\n")
     
-    # Daten einlesen
     products = readdata()
     
     if not products:
         print("Keine Produkte gefunden. Programm wird beendet.")
         return
     
-    # Berechnungen durchführen
     products = calculation(products)
     
-    # Konsolenausgabe
     print("\n" + "=" * 80)
     print("PRODUKTLISTE MIT RABATTEN")
     print("=" * 80)
@@ -138,12 +125,9 @@ def main():
             f"{p['discount_percent']:>9.2f} %"
         )
     
-    # Bericht in Datei schreiben
     write_report(products)
     
-    # Zusammenfassung ausgeben
     print_summary(products)
 
-# Programm ausführen
 if __name__ == "__main__":
     main()
